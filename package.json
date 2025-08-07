@@ -21,8 +21,9 @@
     "immutable"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm run typecheck && tsup",
     "build:watch": "tsup --watch",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "prepare": "pnpm run build",
     "list-rules": "node dist/cli/list-rules.js",
