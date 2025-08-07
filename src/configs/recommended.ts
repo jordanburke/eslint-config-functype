@@ -27,6 +27,9 @@ export default {
     // Core JavaScript immutability
     "prefer-const": "error",
     "no-var": "error",
+    "no-throw-literal": "error",
+    "no-mixed-spaces-and-tabs": "error",
+    "no-extra-semi": "error",
 
     // TypeScript functional patterns (when @typescript-eslint is available)
     "@typescript-eslint/consistent-type-imports": "error",
@@ -43,6 +46,14 @@ export default {
         args: "after-used",
       },
     ],
+    "@typescript-eslint/no-unused-expressions": [
+      "error",
+      {
+        allowShortCircuit: true,
+        allowTernary: true,
+      },
+    ],
+    
     // Functional programming rules (when eslint-plugin-functional is available)
     "functional/no-let": "error",
     "functional/immutable-data": "warn",
