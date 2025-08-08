@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 eslint-config-functype is a curated ESLint configuration bundle for functional TypeScript programming. This config combines and configures rules from established ESLint plugins rather than creating custom rules.
 
+**Development Requirements:** Node.js 22.0.0 or higher (for building/testing only - end users can run the plugin on any Node version supported by ESLint).
+
 ## Commands
 
 ### Build and Development

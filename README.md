@@ -191,12 +191,16 @@ npx eslint-config-functype functype-list-rules
 ## CI/CD
 
 This plugin includes GitHub Actions workflows for:
-- ✅ **Testing** on Node.js 18, 20, 22
+- ✅ **Testing** on Node.js 22
 - ✅ **Linting** with our own rules  
 - ✅ **Building** and validation
 - ✅ **Publishing** to npm on version changes
 
 ## Development
+
+### Requirements
+- Node.js 22.0.0 or higher
+- pnpm (recommended package manager)
 
 ```bash
 # Install dependencies
