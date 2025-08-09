@@ -66,6 +66,12 @@ export default {
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/no-unnecessary-condition": "warn",
+    // Relax strict-boolean-expressions for functional library patterns
+    // This rule is valuable for applications but creates excessive noise in a functional library where:
+    // 1. Optional chaining patterns like `if (options?.prop)` are idiomatic and safe
+    // 2. String/object truthiness checks are common and intentional (e.g., `if (message)`)
+    // 3. The functional design already provides safety through Option/Either patterns
+    // 4. Library code often needs flexibility for performance and interoperability
     "@typescript-eslint/strict-boolean-expressions": [
       "warn",
       {
