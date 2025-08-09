@@ -66,11 +66,18 @@ export default {
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/no-unnecessary-condition": "warn",
-    "@typescript-eslint/strict-boolean-expressions": ["warn", {
-      "allowString": false,
-      "allowNumber": false,
-      "allowNullableObject": false
-    }],
+    "@typescript-eslint/strict-boolean-expressions": [
+      "warn",
+      {
+        "allowString": true,           // Allow `if (str)` patterns
+        "allowNumber": true,           // Allow `if (num)` patterns  
+        "allowNullableObject": true,   // Allow `if (obj?.prop)` patterns
+        "allowNullableBoolean": true,  // Allow `if (bool)` where bool might be null/undefined
+        "allowNullableString": true,   // Allow `if (str)` where str might be null/undefined
+        "allowNullableNumber": true,   // Allow `if (num)` where num might be null/undefined
+        "allowAny": true              // Allow `if (value)` where value is any type
+      }
+    ],
     
     // Functional programming rules (when eslint-plugin-functional is available)
     "functional/no-let": "error",

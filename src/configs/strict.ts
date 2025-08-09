@@ -17,5 +17,6 @@ export default {
     // Stricter TypeScript rules (non-type-aware)
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error", // Default strict
   },
 }
