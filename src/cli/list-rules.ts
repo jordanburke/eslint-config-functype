@@ -25,6 +25,15 @@ interface LoadedConfig {
   rules: Map<string, RuleData>
 }
 
+interface RuleDiff {
+  name: string
+  status: 'added' | 'removed' | 'different' | 'same'
+  localSeverity?: RuleSeverity
+  functypeSeverity?: RuleSeverity
+  localOptions?: unknown[]
+  functypeOptions?: unknown[]
+}
+
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
@@ -45,7 +54,8 @@ async function loadConfig(configPath: string): Promise<Config | null> {
   try {
     // For built JS files, use require
     if (configPath.endsWith('.js')) {
-      const configModule = require(configPath)
+      const resolvedPath = path.resolve(configPath)
+      const configModule = require(resolvedPath)
       return configModule.default || configModule
     }
     
@@ -223,11 +233,225 @@ function printDependencyStatus(result: ValidationResult): void {
   console.log(colorize(`\n${status}`, statusColor))
 }
 
+async function loadLocalESLintConfig(configPath: string): Promise<Config | null> {
+  try {
+    // Try common ESLint config file names if no path provided
+    const possibleConfigs = [
+      'eslint.config.js',
+      'eslint.config.mjs', 
+      'eslint.config.ts',
+      '.eslintrc.js',
+      '.eslintrc.json'
+    ]
+    
+    let actualPath = configPath
+    if (!configPath) {
+      // Search for config file in current directory
+      for (const filename of possibleConfigs) {
+        if (fs.existsSync(filename)) {
+          actualPath = filename
+          break
+        }
+      }
+      if (!actualPath) {
+        console.log(colorize('❌ No ESLint config file found. Searched for:', 'red'))
+        possibleConfigs.forEach(f => console.log(`  • ${f}`))
+        return null
+      }
+    }
+
+    console.log(colorize(`📖 Loading local config: ${actualPath}`, 'cyan'))
+    
+    // Handle flat config (eslint.config.js)
+    if (actualPath.includes('eslint.config')) {
+      const configModule = await import(path.resolve(actualPath))
+      const config = configModule.default || configModule
+      
+      // Flat config is array of config objects, merge rules
+      if (Array.isArray(config)) {
+        const mergedRules: Record<string, RuleConfig> = {}
+        config.forEach((cfg: unknown) => {
+          if (cfg && typeof cfg === 'object' && 'rules' in cfg) {
+            const configObj = cfg as Config
+            if (configObj.rules) {
+              Object.assign(mergedRules, configObj.rules)
+            }
+          }
+        })
+        return { rules: mergedRules }
+      }
+      return config
+    }
+    
+    // Handle legacy config (.eslintrc.*)
+    return await loadConfig(actualPath)
+  } catch (error) {
+    console.error(colorize(`Error loading local config:`, 'red'), (error as Error).message)
+    return null
+  }
+}
+
+function compareRules(localRules: Map<string, RuleData>, functypeRules: Map<string, RuleData>): RuleDiff[] {
+  const allRules = new Set([...localRules.keys(), ...functypeRules.keys()])
+  const diffs: RuleDiff[] = []
+  
+  allRules.forEach(ruleName => {
+    const localRule = localRules.get(ruleName)
+    const functypeRule = functypeRules.get(ruleName)
+    
+    if (!localRule && functypeRule) {
+      // Rule added by functype
+      diffs.push({
+        name: ruleName,
+        status: 'added',
+        functypeSeverity: functypeRule.severity,
+        functypeOptions: functypeRule.options
+      })
+    } else if (localRule && !functypeRule) {
+      // Rule exists locally but not in functype
+      diffs.push({
+        name: ruleName,
+        status: 'removed',
+        localSeverity: localRule.severity,
+        localOptions: localRule.options
+      })
+    } else if (localRule && functypeRule) {
+      // Compare configurations
+      const severityDifferent = localRule.severity !== functypeRule.severity
+      const optionsDifferent = JSON.stringify(localRule.options) !== JSON.stringify(functypeRule.options)
+      
+      if (severityDifferent || optionsDifferent) {
+        diffs.push({
+          name: ruleName,
+          status: 'different',
+          localSeverity: localRule.severity,
+          functypeSeverity: functypeRule.severity,
+          localOptions: localRule.options,
+          functypeOptions: functypeRule.options
+        })
+      } else {
+        diffs.push({
+          name: ruleName,
+          status: 'same',
+          localSeverity: localRule.severity,
+          functypeSeverity: functypeRule.severity
+        })
+      }
+    }
+  })
+  
+  return diffs.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function printDiff(diffs: RuleDiff[], functypeConfigName: string): void {
+  console.log(colorize(`\n🔄 Config Comparison vs ${functypeConfigName}:`, 'bright'))
+  console.log(colorize('='.repeat(60), 'blue'))
+  
+  const categories = {
+    removed: diffs.filter(d => d.status === 'removed'),
+    added: diffs.filter(d => d.status === 'added'),
+    different: diffs.filter(d => d.status === 'different'),
+    same: diffs.filter(d => d.status === 'same')
+  }
+  
+  // Rules you can remove (covered by functype)
+  if (categories.same.length > 0) {
+    console.log(colorize('\n✅ Rules you can remove (covered by functype):', 'green'))
+    categories.same.forEach(diff => {
+      const severity = formatSeverity(diff.functypeSeverity!)
+      console.log(`  • ${diff.name} (${severity})`)
+    })
+  }
+  
+  // New rules functype adds
+  if (categories.added.length > 0) {
+    console.log(colorize('\n➕ New rules functype adds:', 'blue'))
+    categories.added.forEach(diff => {
+      const severity = formatSeverity(diff.functypeSeverity!)
+      const severityColored = colorize(`[${severity.toUpperCase()}]`, getSeverityColor(diff.functypeSeverity!))
+      console.log(`  • ${diff.name} ${severityColored}`)
+    })
+  }
+  
+  // Rules with conflicts
+  if (categories.different.length > 0) {
+    console.log(colorize('\n🔀 Conflicting rules (will override functype):', 'yellow'))
+    categories.different.forEach(diff => {
+      const localSeverity = formatSeverity(diff.localSeverity!)
+      const functypeSeverity = formatSeverity(diff.functypeSeverity!)
+      console.log(`  • ${diff.name}`)
+      console.log(`    Local:    ${localSeverity}`)
+      console.log(`    Functype: ${functypeSeverity}`)
+    })
+  }
+  
+  // Rules you have that functype doesn't
+  if (categories.removed.length > 0) {
+    console.log(colorize('\n➖ Your additional rules (not in functype):', 'magenta'))
+    categories.removed.forEach(diff => {
+      const severity = formatSeverity(diff.localSeverity!)
+      console.log(`  • ${diff.name} (${severity})`)
+    })
+  }
+  
+  // Summary stats
+  console.log(colorize('\n📊 Migration Summary:', 'bright'))
+  console.log(`  ${categories.same.length} rules can be removed`)
+  console.log(`  ${categories.added.length} new rules will be added`)
+  console.log(`  ${categories.different.length} rules have conflicts`)
+  console.log(`  ${categories.removed.length} additional rules you keep`)
+  
+  // Migration suggestions
+  if (categories.same.length > 0 || categories.different.length > 0) {
+    console.log(colorize('\n💡 Suggested migration steps:', 'bright'))
+    if (categories.same.length > 0) {
+      console.log('1. Remove duplicate rules from your config (they match functype)')
+    }
+    if (categories.different.length > 0) {
+      console.log('2. Review conflicting rules - decide if you want local overrides')
+    }
+    console.log('3. Add functype config: extends: ["plugin:functype/recommended"]')
+  }
+}
+
+async function runDiffMode(configPath: string): Promise<void> {
+  console.log(colorize('🔄 ESLint Config Diff Mode', 'bright'))
+  
+  // Load local config
+  const localConfig = await loadLocalESLintConfig(configPath)
+  if (!localConfig) {
+    console.error(colorize('❌ Could not load local ESLint config', 'red'))
+    process.exit(1)
+  }
+  
+  const localRules = extractRules(localConfig)
+  console.log(colorize(`Found ${localRules.size} rules in local config`, 'cyan'))
+  
+  // Load functype configs
+  const distPath = path.join(__dirname, '..', '..', 'dist')
+  const configs = [
+    { name: 'Recommended', path: path.join(distPath, 'configs', 'recommended.js') },
+    { name: 'Strict', path: path.join(distPath, 'configs', 'strict.js') }
+  ]
+  
+  for (const {name, path: configPath} of configs) {
+    const functypeConfig = await loadConfig(configPath)
+    if (functypeConfig) {
+      const functypeRules = extractRules(functypeConfig)
+      const diffs = compareRules(localRules, functypeRules)
+      printDiff(diffs, name)
+    }
+  }
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   const showHelp = args.includes('--help') || args.includes('-h')
   const showUsage = args.includes('--usage') || args.includes('-u')
   const checkDeps = args.includes('--check-deps') || args.includes('--check')
+  const diffMode = args.includes('--diff')
+  const diffConfigIndex = args.findIndex(arg => arg === '--diff')
+  const diffConfigPath = diffConfigIndex !== -1 && args[diffConfigIndex + 1] ? args[diffConfigIndex + 1] : ''
   
   if (showHelp) {
     console.log(colorize('📋 ESLint Plugin Functype - Rule Lister', 'bright'))
@@ -235,9 +459,19 @@ async function main(): Promise<void> {
     console.log('\nOptions:')
     console.log('  --verbose, -v      Show rule options')
     console.log('  --usage, -u        Show usage examples')
-    console.log('  --check-deps       Check peer dependency status')  
+    console.log('  --check-deps       Check peer dependency status')
+    console.log('  --diff [config]    Compare local ESLint config with functype')  
     console.log('  --help, -h         Show this help message')
     console.log('\nThis command lists all rules configured in the functype plugin configurations.')
+    console.log('\nDiff mode:')
+    console.log('  --diff             Auto-detect local ESLint config file')
+    console.log('  --diff <path>      Compare specific config file with functype')
+    return
+  }
+  
+  // Handle diff mode
+  if (diffMode) {
+    await runDiffMode(diffConfigPath)
     return
   }
   

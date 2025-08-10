@@ -30,7 +30,8 @@
     "list-rules:verbose": "node dist/cli/list-rules.js --verbose",
     "list-rules:usage": "node dist/cli/list-rules.js --usage",
     "check-deps": "node dist/cli/list-rules.js --check-deps",
-    "cli:help": "node dist/cli/list-rules.js --help"
+    "cli:help": "node dist/cli/list-rules.js --help",
+    "diff": "node dist/cli/list-rules.js --diff"
   },
   "peerDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.38.0 || ^8.39.0 || ^9.0.0",
