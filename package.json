@@ -43,20 +43,20 @@
     "prettier": "^3.0.0"
   },
   "dependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.32.0"
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.3"
   },
   "devDependencies": {
-    "@types/node": "^22.17.1",
-    "@typescript-eslint/eslint-plugin": "^8.39.0",
-    "@typescript-eslint/parser": "^8.39.0",
-    "eslint": "^9.32.0",
-    "eslint-plugin-functional": "^9.0.2",
-    "eslint-plugin-prettier": "^5.5.4",
+    "@types/node": "^22.19.11",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^9.39.3",
+    "eslint-plugin-functional": "^9.0.4",
+    "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "prettier": "^3.6.2",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "prettier": "^3.8.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "author": "Jordan Burke",
   "repository": {
