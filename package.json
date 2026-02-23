@@ -1,13 +1,30 @@
 {
   "name": "eslint-config-functype",
-  "version": "1.3.0",
+  "version": "2.0.0",
+  "type": "module",
   "description": "Curated ESLint flat config bundle for functional TypeScript programming (ESLint 9.x+)",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./recommended": {
+      "types": "./dist/configs/recommended.d.ts",
+      "import": "./dist/configs/recommended.js",
+      "default": "./dist/configs/recommended.js"
+    },
+    "./strict": {
+      "types": "./dist/configs/strict.d.ts",
+      "import": "./dist/configs/strict.js",
+      "default": "./dist/configs/strict.js"
+    }
+  },
   "files": [
-    "dist/",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
   "bin": {
     "functype-list-rules": "dist/cli/list-rules.js"
@@ -20,12 +37,22 @@
     "typescript",
     "immutable"
   ],
+  "prettier": "ts-builds/prettier",
   "scripts": {
-    "build": "pnpm run typecheck && tsup",
-    "build:watch": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
-    "prepare": "pnpm run build",
+    "validate": "ts-builds validate",
+    "format": "ts-builds format",
+    "format:check": "ts-builds format:check",
+    "lint": "ts-builds lint",
+    "lint:check": "ts-builds lint:check",
+    "typecheck": "ts-builds typecheck",
+    "test": "ts-builds test",
+    "test:watch": "ts-builds test:watch",
+    "test:coverage": "ts-builds test:coverage",
+    "build": "ts-builds build",
+    "build:watch": "ts-builds dev",
+    "dev": "ts-builds dev",
+    "prepare": "pnpm build",
+    "prepublishOnly": "pnpm validate",
     "list-rules": "node dist/cli/list-rules.js",
     "list-rules:verbose": "node dist/cli/list-rules.js --verbose",
     "list-rules:usage": "node dist/cli/list-rules.js --usage",
@@ -50,13 +77,11 @@
     "@types/node": "^24.10.13",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "eslint": "^9.39.3",
     "eslint-plugin-functional": "^9.0.4",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "prettier": "^3.8.1",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "ts-builds": "^2.4.0",
+    "tsdown": "^0.20.3"
   },
   "author": "Jordan Burke",
   "repository": {

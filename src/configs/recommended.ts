@@ -1,7 +1,7 @@
 import {
-  validatePeerDependencies,
   createValidationError,
   shouldValidateDependencies,
+  validatePeerDependencies,
 } from "../utils/dependency-validator"
 
 // Validate peer dependencies on config load
@@ -32,10 +32,13 @@ export default {
     "no-extra-semi": "error",
     "object-shorthand": "error",
     "prefer-template": "error",
-    "prefer-destructuring": ["error", {
-      "array": false,
-      "object": true
-    }],
+    "prefer-destructuring": [
+      "error",
+      {
+        array: false,
+        object: true,
+      },
+    ],
 
     // TypeScript functional patterns (when @typescript-eslint is available)
     "@typescript-eslint/consistent-type-imports": "error",
@@ -75,28 +78,31 @@ export default {
     "@typescript-eslint/strict-boolean-expressions": [
       "warn",
       {
-        "allowString": true,           // Allow `if (str)` patterns
-        "allowNumber": true,           // Allow `if (num)` patterns  
-        "allowNullableObject": true,   // Allow `if (obj?.prop)` patterns
-        "allowNullableBoolean": true,  // Allow `if (bool)` where bool might be null/undefined
-        "allowNullableString": true,   // Allow `if (str)` where str might be null/undefined
-        "allowNullableNumber": true,   // Allow `if (num)` where num might be null/undefined
-        "allowAny": true              // Allow `if (value)` where value is any type
-      }
+        allowString: true, // Allow `if (str)` patterns
+        allowNumber: true, // Allow `if (num)` patterns
+        allowNullableObject: true, // Allow `if (obj?.prop)` patterns
+        allowNullableBoolean: true, // Allow `if (bool)` where bool might be null/undefined
+        allowNullableString: true, // Allow `if (str)` where str might be null/undefined
+        allowNullableNumber: true, // Allow `if (num)` where num might be null/undefined
+        allowAny: true, // Allow `if (value)` where value is any type
+      },
     ],
-    
+
     // Functional programming rules (when eslint-plugin-functional is available)
     "functional/no-let": "error",
     "functional/immutable-data": "warn",
     "functional/no-loop-statements": "off", // Start disabled, can enable later
-    "functional/prefer-immutable-types": ["warn", {
-      "enforcement": "ReadonlyShallow",
-      "ignoreInferredTypes": true
-    }],
+    "functional/prefer-immutable-types": [
+      "warn",
+      {
+        enforcement: "ReadonlyShallow",
+        ignoreInferredTypes: true,
+      },
+    ],
     "functional/no-mixed-types": "off",
     "functional/functional-parameters": "off",
     "functional/no-throw-statements": "warn",
-    "functional/no-try-statements": ["warn", { "allowCatch": true }],
+    "functional/no-try-statements": ["warn", { allowCatch: true }],
 
     // Allow some flexibility
     "functional/no-conditional-statements": "off",

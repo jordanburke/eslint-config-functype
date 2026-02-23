@@ -1,4 +1,3 @@
-
 import recommended from "./configs/recommended"
 import strict from "./configs/strict"
 
@@ -11,8 +10,8 @@ const plugin = {
   // Meta information
   meta: {
     name: "eslint-config-functype",
-    version: "1.2.0",
+    version: "2.0.0",
   },
 }
 
-export = plugin
+export default plugin

@@ -7,7 +7,7 @@ A curated ESLint configuration bundle for functional TypeScript programming. Thi
 Instead of recreating functional programming rules, this plugin provides carefully curated configurations that combine rules from:
 
 - **eslint-plugin-functional**: Core functional programming rules
-- **@typescript-eslint/eslint-plugin**: TypeScript-specific functional patterns  
+- **@typescript-eslint/eslint-plugin**: TypeScript-specific functional patterns
 - **ESLint core**: JavaScript immutability basics
 
 ## Installation
@@ -77,18 +77,18 @@ export default [
       // Core immutability
       "prefer-const": "error",
       "no-var": "error",
-      
+
       // TypeScript functional patterns
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      
+
       // Functional programming rules
       "functional/no-let": "error",
       "functional/immutable-data": "warn",
       "functional/no-loop-statements": "off", // Enable as "error" for strict mode
     },
-  }
+  },
 ]
 ```
 
@@ -111,6 +111,7 @@ You can also use individual rules without our presets:
 ## What Rules Are Included
 
 ### Recommended Configuration
+
 - ✅ `prefer-const` / `no-var` - Basic immutability
 - ✅ `functional/no-let` - Disallow `let` declarations
 - ⚠️ `functional/immutable-data` - Warn on data mutation
@@ -119,7 +120,9 @@ You can also use individual rules without our presets:
 - ✅ `@typescript-eslint/no-explicit-any` - Type safety
 
 ### Strict Configuration
+
 All recommended rules plus:
+
 - ✅ `functional/no-loop-statements` - Disallow imperative loops
 - ✅ `functional/immutable-data` - Error on data mutation
 - ✅ `functional/prefer-immutable-types` - Encourage readonly types
@@ -129,14 +132,17 @@ All recommended rules plus:
 
 ```typescript
 // ❌ Bad (will be flagged)
-let x = 1;                    // functional/no-let
-arr.push(item);              // functional/immutable-data  
-for(let i = 0; i < 10; i++)  // functional/no-loop-statements (strict only)
-
-// ✅ Good  
-const x = 1;
-const newArr = [...arr, item];
-arr.forEach(item => process(item));
+let x = 1 // functional/no-let
+arr.push(item) // functional/immutable-data
+for (
+  let i = 0;
+  i < 10;
+  i++ // functional/no-loop-statements (strict only)
+)
+  // ✅ Good
+  const x = 1
+const newArr = [...arr, item]
+arr.forEach((item) => process(item))
 ```
 
 ## Configurations
@@ -149,7 +155,7 @@ arr.forEach(item => process(item));
 This plugin follows the principle of **composition over recreation**. Rather than maintaining custom rules, we curate and combine battle-tested rules from the community, ensuring:
 
 - ✅ Less maintenance burden
-- ✅ Better rule quality and edge case handling  
+- ✅ Better rule quality and edge case handling
 - ✅ Automatic updates from upstream plugins
 - ✅ Community-driven improvements
 
@@ -164,7 +170,7 @@ See exactly which rules are configured in each preset:
 pnpm run list-rules
 
 # Show rule options/configuration
-pnpm run list-rules:verbose  
+pnpm run list-rules:verbose
 
 # Show usage examples
 pnpm run list-rules:usage
@@ -191,14 +197,16 @@ npx eslint-config-functype functype-list-rules
 ## CI/CD
 
 This plugin includes GitHub Actions workflows for:
+
 - ✅ **Testing** on Node.js 22
-- ✅ **Linting** with our own rules  
+- ✅ **Linting** with our own rules
 - ✅ **Building** and validation
 - ✅ **Publishing** to npm on version changes
 
 ## Development
 
 ### Requirements
+
 - Node.js 22.0.0 or higher
 - pnpm (recommended package manager)
 
@@ -212,7 +220,7 @@ pnpm run build
 # Lint
 pnpm run lint
 
-# List rules during development  
+# List rules during development
 pnpm run list-rules
 ```
 
@@ -223,6 +231,7 @@ pnpm run list-rules
 If you see errors like `Definition for rule '@typescript-eslint/no-explicit-any' was not found`, you're missing peer dependencies.
 
 **Quick Check:**
+
 ```bash
 pnpm run check-deps
 ```
@@ -230,6 +239,7 @@ pnpm run check-deps
 This will show you exactly which dependencies are missing and provide the installation command.
 
 **Manual Installation:**
+
 ```bash
 pnpm add -D @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-functional eslint-plugin-prettier eslint-plugin-simple-import-sort prettier
 ```
